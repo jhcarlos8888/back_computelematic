@@ -13,6 +13,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -26,16 +28,22 @@ public class MediaController {
 
 
     @PostMapping("upload")
-    public Map<String,String> uploadFile (@RequestParam("file")MultipartFile multipartFile){
-        String path = storageService.store(multipartFile);
-        String host = request.getRequestURL().toString().replace(request.getRequestURI(),"");
-        String url = ServletUriComponentsBuilder
-                .fromHttpUrl(host)
-                .path("/media/")
-                .path(path)
-                .toUriString();
+    public List<Map<String, String>> uploadFiles(@RequestParam("files") List<MultipartFile> multipartFiles) {
+        List<Map<String, String>> responseList = new ArrayList<>();
 
-        return Map.of("url", url);
+        for (MultipartFile multipartFile : multipartFiles) {
+            String path = storageService.store(multipartFile);
+            String host = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+            String url = ServletUriComponentsBuilder
+                    .fromHttpUrl(host)
+                    .path("/media/")
+                    .path(path)
+                    .toUriString();
+
+            responseList.add(Map.of("url", url));
+        }
+
+        return responseList;
     }
 
 
